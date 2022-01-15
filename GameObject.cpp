@@ -1,30 +1,25 @@
 #include "GameObject.h"
 #include "TextureManager.h"
+#include "Constants.h"
 
-GameObject::GameObject(const char* textureSheet, SDL_Renderer* ren, int initialX, int initialY) {
+GameObject::GameObject(const char* textureSheet, SDL_Renderer* ren, int x, int y) {
 	renderer = ren;
-	objectTexture = TextureManager::LoadTexture(textureSheet, ren);
+	texture = TextureManager::LoadTexture(textureSheet, ren);
 
-	xPos = initialX;
-	yPos = initialY;
+	// Init position
+	PosX = x;
+	PosY = y;
+
+	entityRect.w = ENTITY_SIZE * 2;
+	entityRect.h = ENTITY_SIZE * 2;
+	entityRect.x = PosX;
+	entityRect.y = PosY;
 }
 
-void GameObject::Update() {
-	/*xPos++;
-	yPos++;
-	*/
-	srcRect.h = 32;
-	srcRect.w = 32;
-	srcRect.x = 0;
-	srcRect.y = 0;
-
-	destRect.x = xPos;
-	destRect.y = yPos;
-
-	destRect.w = srcRect.w * 2;
-	destRect.h = srcRect.h * 2;
+GameObject::~GameObject() {
+	SDL_DestroyTexture(texture);
 }
 
 void GameObject::Render() {
-	SDL_RenderCopy(renderer, objectTexture, NULL, &destRect);
+	SDL_RenderCopy(renderer, texture, NULL, &entityRect);
 }

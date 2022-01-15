@@ -1,10 +1,10 @@
 #pragma once
 #include "Game.hpp"
 
-class GameObject {
+class Label {
 public:
-	GameObject(const char* textureSheet, SDL_Renderer* ren, int y, int x);
-	~GameObject();
+	Label(const char* textureSheet, SDL_Renderer* ren, int y, int x, const char* text, bool small);
+	~Label();
 
 	void Render();
 

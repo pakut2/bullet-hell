@@ -1,25 +1,42 @@
-#pragma once
 #include "Game.hpp"
 
 class Player {
 public:
-	Player(const char* textureSheet, SDL_Renderer* ren, int x, int y);
+	Player(const char* textureSheet, SDL_Renderer* ren);
 	~Player();
 
-	int velocity;
+	static const int PLAYER_VEL = 10;
 
-	void Update();
-	void MoveUp();
-	void MoveDown();
-	void MoveRight();
-	void MoveLeft();
+	void Update(int camX, int camY);
+	void HandleEvent(SDL_Event& e);
+	void Move();
 	void Render();
 
-private:
-	int xPos;
-	int yPos;
+	int getPosX();
+	int getPosY();
+	int getInvincibilityFrames();
+	int getHp();
+	void setInvincibility(int invincibility);
+	void setHp();
 
-	SDL_Texture* objectTexture;
-	SDL_Rect srcRect, destRect;
+	SDL_Rect getRect() {
+		return entityRect;
+	}
+
+private:
+	// The current position of the player
+	int PosX, PosY;
+
+	// The velocity of the player
+	int VelX, VelY;
+
+	// Number of frames the player cannot be hit
+	int invincibilityFrames;
+
+	// Remaining health of the player
+	int hp;
+
+	SDL_Texture* texture;
+	SDL_Rect entityRect;
 	SDL_Renderer* renderer;
 };
