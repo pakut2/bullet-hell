@@ -86,6 +86,7 @@ Game::~Game() {
 
 // Init SDL
 void Game::init(const char* title, int xPos, int yPos, int width, int height, bool fullscreen) {
+	counter = 0;
 	isGameOver = false;
 	isMenuActive = true;
 	bulletAngle = 0;
@@ -359,7 +360,9 @@ void Game::render() {
 	renderEnemies(curveEnemies, NUMBER_OF_CURVE_ENEMIES);
 	movingEnemy->Render();
 
-	renderBullets(basicEnemyBullets, NUMBER_OF_ALL_BASIC_BULLETS);
+	if (counter > 50) {
+		renderBullets(basicEnemyBullets, NUMBER_OF_ALL_BASIC_BULLETS);
+	}
 	renderBullets(curveEnemyBullets, NUMBER_OF_ALL_CURVE_BULLETS);
 	renderBullets(movingEnemyBullets, DIRECTIONS);
 
