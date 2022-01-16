@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Game.hpp"
 #include "TextureManager.h"
 #include "GameObject.h"
@@ -9,15 +10,18 @@
 #include "Bullet.h"
 #include "Label.h"
 
+// Entities
 Player* player;
 Enemy* basicEnemies[NUMBER_OF_BASIC_ENEMIES];
+Enemy* curveEnemies[NUMBER_OF_CURVE_ENEMIES];
 Enemy* movingEnemy;
-Bullet* basicEnemyBullets[NUMBER_OF_ALL_BULLETS];
+Bullet* basicEnemyBullets[NUMBER_OF_ALL_BASIC_BULLETS];
+Bullet* curveEnemyBullets[NUMBER_OF_ALL_CURVE_BULLETS];
 Bullet* movingEnemyBullets[DIRECTIONS];
 GameObject* health[PLAYER_HEALTH];
-
 SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
+// Backgorunds and menu labels
 Texture* BGTexture;
 Texture* MenuBGTexture;
 Label* startButton;
@@ -25,6 +29,55 @@ Label* exitButton;
 Label* gameOverButton;
 Label* menuButton;
 Label* timer;
+
+// Create enemies and corresponding bullets
+void createEnemies(SDL_Renderer* renderer, Enemy* enemies[], Bullet* bullets[], const int numberOfEnemies) {
+	for (int i = 0; i < numberOfEnemies; i++) {
+		int randomX = random(0, LEVEL_WIDTH);
+		int randomY = random(0, LEVEL_HEIGHT);
+
+		enemies[i] = new Enemy("assets/enemy.bmp", renderer, randomX, randomY);
+
+		for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
+			bullets[j] = new Bullet("assets/bullet.bmp", renderer, randomX, randomY);
+		}
+	}
+}
+
+// Shoot new bullets
+void shoot(SDL_Renderer* renderer, Enemy* enemies[], Bullet* bullets[], const int numberOfEnemies) {
+	for (int i = 0; i < numberOfEnemies; i++) {
+		for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
+			bullets[j] = new Bullet("assets/bullet.bmp", renderer, enemies[i]->getPosX(), enemies[i]->getPosY());
+		}
+	}
+}
+
+// Update entities
+void updateEnemies(Enemy* enemies[], const int numberOfEntites) {
+	for (int i = 0; i < numberOfEntites; i++) {
+		enemies[i]->Update(camera.x, camera.y);
+	}
+}
+
+void updateBullets(Bullet* bullets[], const int numberOfEntites) {
+	for (int i = 0; i < numberOfEntites; i++) {
+		bullets[i]->Update(camera.x, camera.y);
+	}
+}
+
+// Render entities
+void renderEnemies(Enemy* enemies[], const int numberOfEntites) {
+	for (int i = 0; i < numberOfEntites; i++) {
+		enemies[i]->Render();
+	}
+}
+
+void renderBullets(Bullet* bullets[], const int numberOfEntites) {
+	for (int i = 0; i < numberOfEntites; i++) {
+		bullets[i]->Render();
+	}
+}
 
 Game::Game() {}
 
@@ -36,6 +89,7 @@ Game::~Game() {
 void Game::init(const char* title, int xPos, int yPos, int width, int height, bool fullscreen) {
 	isGameOver = false;
 	isMenuActive = true;
+	bulletAngle = 0;
 	int flags = 0;
 
 	if (fullscreen) {
@@ -68,21 +122,13 @@ void Game::init(const char* title, int xPos, int yPos, int width, int height, bo
 	gameOverButton = new Label("assets/over.bmp", renderer, SCREEN_WIDTH / 10, SCREEN_HEIGHT / 2 - 120, "", false);
 	menuButton = new Label("assets/menu.bmp", renderer, SCREEN_WIDTH / 10, SCREEN_HEIGHT / 2 + 60, "", false);
 
-	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
-		int randomX = random(0, LEVEL_WIDTH);
-		int randomY = random(0, LEVEL_HEIGHT);
-
-		basicEnemies[i] = new Enemy("assets/enemy.bmp", renderer, randomX, randomY);
-
-		for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
-			basicEnemyBullets[j] = new Bullet("assets/bullet.bmp", renderer, randomX, randomY);
-		}
-	}
+	createEnemies(renderer, basicEnemies, basicEnemyBullets, NUMBER_OF_BASIC_ENEMIES);
+	createEnemies(renderer, curveEnemies, curveEnemyBullets, NUMBER_OF_CURVE_ENEMIES);
 
 	movingEnemy = new Enemy("assets/enemy.bmp", renderer, LEVEL_WIDTH / 2, LEVEL_HEIGHT / 2);
 
 	for (int i = 0; i < DIRECTIONS; i++) {
-		movingEnemyBullets[i] = new Bullet("assets/bullet.bmp", renderer, LEVEL_WIDTH / 2, (LEVEL_HEIGHT / 2) + RADIUS);
+		movingEnemyBullets[i] = new Bullet("assets/bullet.bmp", renderer, LEVEL_WIDTH / 2, (LEVEL_HEIGHT / 2) + ENEMY_RADIUS);
 	}
 
 	for (int i = 0; i < PLAYER_HEALTH; i++) {
@@ -113,30 +159,40 @@ void Game::handleEvents() {
 		default:
 			break;
 		}
-		// Handle input for the player
+
 		player->HandleEvent(event);
 	}
 
-	// Change player position
 	player->Move();
 
-	if (counter % 100 == 0) {
-		for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
-			for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
-				basicEnemyBullets[j] = new Bullet("assets/bullet.bmp", renderer, basicEnemies[i]->getPosX(), basicEnemies[i]->getPosY());
-			}
-		}
+	// Shoot bullets in interval
+	if (counter % 70 == 0) {
+		shoot(renderer, basicEnemies, basicEnemyBullets, NUMBER_OF_BASIC_ENEMIES);
+	}
 
+	if (counter % 100 == 0) {
+		shoot(renderer, curveEnemies, curveEnemyBullets, NUMBER_OF_CURVE_ENEMIES);
+	}
+
+	if (counter % 200 == 0) {
 		for (int i = 0; i < DIRECTIONS; i++) {
 			movingEnemyBullets[i] = new Bullet("assets/bullet.bmp", renderer, movingEnemy->getActualX(), movingEnemy->getActualY());
 		}
 	}
 
+	// Move bullets
 	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
 		basicEnemyBullets[i * NUMBER_OF_BULLETS]->Move(BULLET_VELOCITY, 0);
 		basicEnemyBullets[i * NUMBER_OF_BULLETS + 1]->Move(-BULLET_VELOCITY, 0);
 		basicEnemyBullets[i * NUMBER_OF_BULLETS + 2]->Move(0, BULLET_VELOCITY);
 		basicEnemyBullets[i * NUMBER_OF_BULLETS + 3]->Move(0, -BULLET_VELOCITY);
+	}
+
+	for (int i = 0; i < NUMBER_OF_CURVE_ENEMIES; i++) {
+		curveEnemyBullets[i * NUMBER_OF_BULLETS]->Move(BULLET_VELOCITY, BULLET_RADIUS * cos(bulletAngle));
+		curveEnemyBullets[i * NUMBER_OF_BULLETS + 1]->Move(-BULLET_VELOCITY, BULLET_RADIUS * cos(bulletAngle));
+		curveEnemyBullets[i * NUMBER_OF_BULLETS + 2]->Move(BULLET_RADIUS * sin(bulletAngle), BULLET_VELOCITY);
+		curveEnemyBullets[i * NUMBER_OF_BULLETS + 3]->Move(BULLET_RADIUS * sin(bulletAngle), -BULLET_VELOCITY);
 	}
 
 	movingEnemyBullets[0]->Move(BULLET_VELOCITY, 0);
@@ -147,6 +203,26 @@ void Game::handleEvents() {
 	movingEnemyBullets[5]->Move(BULLET_VELOCITY, BULLET_VELOCITY);
 	movingEnemyBullets[6]->Move(BULLET_VELOCITY, -BULLET_VELOCITY);
 	movingEnemyBullets[7]->Move(-BULLET_VELOCITY, BULLET_VELOCITY);
+}
+
+bool checkCollisionForPlayer(Bullet* bullets[], const int numberOfBullets, const int counter) {
+	for (int i = 0; i < numberOfBullets; i++) {
+		// Remove extra player space taken by the thruster
+		SDL_Rect playerRect = player->getRect();
+		playerRect.w = ENTITY_SIZE * 2;
+		playerRect.h = ENTITY_SIZE * 2;
+
+		if (checkColiision(playerRect, bullets[i]->getRect())) {
+			player->setInvincibility(counter + INVINCIBILITY_FRAMES);
+			player->setHp();
+			if (!player->getHp()) {
+				return true;
+			}
+			break;
+		}
+	}
+
+	return false;
 }
 
 // Update entity positions and other data
@@ -171,54 +247,29 @@ void Game::update() {
 
 	player->Update(camera.x, camera.y);
 
-	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
-		basicEnemies[i]->Update(camera.x, camera.y);
-	}
-
+	updateEnemies(basicEnemies, NUMBER_OF_BASIC_ENEMIES);
+	updateEnemies(curveEnemies, NUMBER_OF_CURVE_ENEMIES);
 	movingEnemy->UpdateMoving(camera.x, camera.y);
 
-	for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-		basicEnemyBullets[i]->Update(camera.x, camera.y);
-	}
+	updateBullets(basicEnemyBullets, NUMBER_OF_ALL_BASIC_BULLETS);
+	updateBullets(curveEnemyBullets, NUMBER_OF_ALL_CURVE_BULLETS);
+	updateBullets(movingEnemyBullets, DIRECTIONS);
 
-	for (int i = 0; i < DIRECTIONS; i++) {
-		movingEnemyBullets[i]->Update(camera.x, camera.y);
-	}
-
+	// Check for collision
 	if (player->getInvincibilityFrames() < counter) {
-		for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-			// Remove extra player space taken by the thruster
-			SDL_Rect playerRect = player->getRect();
-			playerRect.w = ENTITY_SIZE * 2;
-			playerRect.h = ENTITY_SIZE * 2;
+		bool gameOver[NUMBER_OF_ENEMY_TYPES];
+		gameOver[0] = checkCollisionForPlayer(basicEnemyBullets, NUMBER_OF_ALL_BASIC_BULLETS, counter);
+		gameOver[1] = checkCollisionForPlayer(curveEnemyBullets, NUMBER_OF_ALL_CURVE_BULLETS, counter);
+		gameOver[2] = checkCollisionForPlayer(movingEnemyBullets, DIRECTIONS, counter);
 
-			if (checkColiision(playerRect, basicEnemyBullets[i]->getRect())) {
-				player->setInvincibility(counter + INVINCIBILITY_FRAMES);
-				player->setHp();
-				if (!player->getHp()) {
-					isGameOver = true;
-				}
-				break;
-			}
-		}
-
-		for (int i = 0; i < DIRECTIONS; i++) {
-			// Remove extra player space taken by the thruster
-			SDL_Rect playerRect = player->getRect();
-			playerRect.w = ENTITY_SIZE * 2;
-			playerRect.h = ENTITY_SIZE * 2;
-
-			if (checkColiision(playerRect, movingEnemyBullets[i]->getRect())) {
-				player->setInvincibility(counter + INVINCIBILITY_FRAMES);
-				player->setHp();
-				if (!player->getHp()) {
-					isGameOver = true;
-				}
-				break;
+		for (int i = 0; i < NUMBER_OF_ENEMY_TYPES; i++) {
+			if (gameOver[i]) {
+				isGameOver = true;
 			}
 		}
 	}
 
+	bulletAngle += 0.05;
 	counter++;
 
 	char text[128];
@@ -305,20 +356,13 @@ void Game::render() {
 	player->Render();
 	timer->Render();
 
-	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
-		basicEnemies[i]->Render();
-	}
-
+	renderEnemies(basicEnemies, NUMBER_OF_BASIC_ENEMIES);
+	renderEnemies(curveEnemies, NUMBER_OF_CURVE_ENEMIES);
 	movingEnemy->Render();
 
-	for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-		basicEnemyBullets[i]->Render();
-	}
-
-	for (int i = 0; i < DIRECTIONS; i++) {
-		movingEnemyBullets[i]->Render();
-	}
-
+	renderBullets(basicEnemyBullets, NUMBER_OF_ALL_BASIC_BULLETS);
+	renderBullets(curveEnemyBullets, NUMBER_OF_ALL_CURVE_BULLETS);
+	renderBullets(movingEnemyBullets, DIRECTIONS);
 
 	for (int i = 0; i < player->getHp(); i++) {
 		health[i]->Render();

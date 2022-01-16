@@ -3,7 +3,7 @@
 
 #include "SDL.h"
 #include "SDL_image.h"
-#include <iostream>
+#include <stdio.h>
 
 class Game {
 public:
@@ -53,6 +53,8 @@ public:
 private:
 	int counter, realTime, deltaTime;
 	bool isRunning, isNewGame, isGameOver, isMenuActive;
+	double bulletAngle;
+
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 };

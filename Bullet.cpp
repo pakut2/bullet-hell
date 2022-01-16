@@ -9,6 +9,8 @@ Bullet::Bullet(const char* textureSheet, SDL_Renderer* ren, int x, int y) {
 	// Init position
 	PosX = x;
 	PosY = y;
+
+	angle = 0;
 }
 
 Bullet::~Bullet() {

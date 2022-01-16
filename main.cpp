@@ -1,7 +1,6 @@
 #include "Game.hpp"
 #include "Constants.h"
-#include <iostream>
-#include<stdio.h>
+#include <stdio.h>
 
 Game* game = nullptr;
 
