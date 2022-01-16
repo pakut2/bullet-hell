@@ -32,8 +32,8 @@ Label* timer;
 // Create enemies and corresponding bullets
 void createEnemies(SDL_Renderer* renderer, Enemy* enemies[], Bullet* bullets[], const int numberOfEnemies) {
 	for (int i = 0; i < numberOfEnemies; i++) {
-		int randomX = random(0, LEVEL_WIDTH);
-		int randomY = random(0, LEVEL_HEIGHT);
+		int randomX = random(100, LEVEL_WIDTH - 100);
+		int randomY = random(100, LEVEL_HEIGHT - 100);
 
 		enemies[i] = new Enemy("assets/enemy.bmp", renderer, randomX, randomY);
 

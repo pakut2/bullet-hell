@@ -1,7 +1,6 @@
 #include "Player.h"
 #include "TextureManager.h"
 #include "Constants.h"
-#include <iostream>
 
 Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	renderer = ren;
@@ -56,7 +55,6 @@ void Player::Update(int camX, int camY) {
 
 // Handle keyboard input
 void Player::HandleEvent(SDL_Event& e) {
-	std::cout << animationFrame << "\n";
 	// Adjust the player velocity and change visible part of player image
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
