@@ -7,13 +7,23 @@ public:
 	~Enemy();
 
 	void Update(int camX, int camY);
+	void UpdateMoving(int camX, int camY);
 	void Render();
 
 	int getPosX();
 	int getPosY();
+	int getActualX();
+	int getActualY();
+
+	SDL_Rect getRect() {
+		return destRect;
+	}
 
 private:
-	int PosX, PosY;
+	int PosX, PosY, actualX, actualY;
+
+	// Angle of circular enemy movement
+	double angle;
 
 	SDL_Texture* texture;
 	SDL_Rect destRect;

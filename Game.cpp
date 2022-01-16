@@ -10,8 +10,10 @@
 #include "Label.h"
 
 Player* player;
-Enemy* enemies[NUMBER_OF_ENEMIES];
-Bullet* bullets[NUMBER_OF_ALL_BULLETS];
+Enemy* basicEnemies[NUMBER_OF_BASIC_ENEMIES];
+Enemy* movingEnemy;
+Bullet* basicEnemyBullets[NUMBER_OF_ALL_BULLETS];
+Bullet* movingEnemyBullets[DIRECTIONS];
 GameObject* health[PLAYER_HEALTH];
 
 SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -66,15 +68,21 @@ void Game::init(const char* title, int xPos, int yPos, int width, int height, bo
 	gameOverButton = new Label("assets/over.bmp", renderer, SCREEN_WIDTH / 10, SCREEN_HEIGHT / 2 - 120, "", false);
 	menuButton = new Label("assets/menu.bmp", renderer, SCREEN_WIDTH / 10, SCREEN_HEIGHT / 2 + 60, "", false);
 
-	for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
+	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
 		int randomX = random(0, LEVEL_WIDTH);
 		int randomY = random(0, LEVEL_HEIGHT);
 
-		enemies[i] = new Enemy("assets/enemy.bmp", renderer, randomX, randomY);
+		basicEnemies[i] = new Enemy("assets/enemy.bmp", renderer, randomX, randomY);
 
 		for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
-			bullets[j] = new Bullet("assets/bullet.bmp", renderer, randomY, randomX);
+			basicEnemyBullets[j] = new Bullet("assets/bullet.bmp", renderer, randomX, randomY);
 		}
+	}
+
+	movingEnemy = new Enemy("assets/enemy.bmp", renderer, LEVEL_WIDTH / 2, LEVEL_HEIGHT / 2);
+
+	for (int i = 0; i < DIRECTIONS; i++) {
+		movingEnemyBullets[i] = new Bullet("assets/bullet.bmp", renderer, LEVEL_WIDTH / 2, (LEVEL_HEIGHT / 2) + RADIUS);
 	}
 
 	for (int i = 0; i < PLAYER_HEALTH; i++) {
@@ -113,19 +121,32 @@ void Game::handleEvents() {
 	player->Move();
 
 	if (counter % 100 == 0) {
-		for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
+		for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
 			for (int j = i * NUMBER_OF_BULLETS; j < (i * NUMBER_OF_BULLETS) + NUMBER_OF_BULLETS; j++) {
-				bullets[j] = new Bullet("assets/bullet.bmp", renderer, enemies[i]->getPosX(), enemies[i]->getPosY());
+				basicEnemyBullets[j] = new Bullet("assets/bullet.bmp", renderer, basicEnemies[i]->getPosX(), basicEnemies[i]->getPosY());
 			}
+		}
+
+		for (int i = 0; i < DIRECTIONS; i++) {
+			movingEnemyBullets[i] = new Bullet("assets/bullet.bmp", renderer, movingEnemy->getActualX(), movingEnemy->getActualY());
 		}
 	}
 
-	for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-		bullets[i * NUMBER_OF_BULLETS]->Move(BULLET_VELOCITY, 0);
-		bullets[i * NUMBER_OF_BULLETS + 1]->Move(-BULLET_VELOCITY, 0);
-		bullets[i * NUMBER_OF_BULLETS + 2]->Move(0, BULLET_VELOCITY);
-		bullets[i * NUMBER_OF_BULLETS + 3]->Move(0, -BULLET_VELOCITY);
+	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
+		basicEnemyBullets[i * NUMBER_OF_BULLETS]->Move(BULLET_VELOCITY, 0);
+		basicEnemyBullets[i * NUMBER_OF_BULLETS + 1]->Move(-BULLET_VELOCITY, 0);
+		basicEnemyBullets[i * NUMBER_OF_BULLETS + 2]->Move(0, BULLET_VELOCITY);
+		basicEnemyBullets[i * NUMBER_OF_BULLETS + 3]->Move(0, -BULLET_VELOCITY);
 	}
+
+	movingEnemyBullets[0]->Move(BULLET_VELOCITY, 0);
+	movingEnemyBullets[1]->Move(-BULLET_VELOCITY, 0);
+	movingEnemyBullets[2]->Move(0, BULLET_VELOCITY);
+	movingEnemyBullets[3]->Move(0, -BULLET_VELOCITY);
+	movingEnemyBullets[4]->Move(-BULLET_VELOCITY, -BULLET_VELOCITY);
+	movingEnemyBullets[5]->Move(BULLET_VELOCITY, BULLET_VELOCITY);
+	movingEnemyBullets[6]->Move(BULLET_VELOCITY, -BULLET_VELOCITY);
+	movingEnemyBullets[7]->Move(-BULLET_VELOCITY, BULLET_VELOCITY);
 }
 
 // Update entity positions and other data
@@ -150,12 +171,18 @@ void Game::update() {
 
 	player->Update(camera.x, camera.y);
 
-	for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-		enemies[i]->Update(camera.x, camera.y);
+	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
+		basicEnemies[i]->Update(camera.x, camera.y);
 	}
 
+	movingEnemy->UpdateMoving(camera.x, camera.y);
+
 	for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-		bullets[i]->Update(camera.x, camera.y);
+		basicEnemyBullets[i]->Update(camera.x, camera.y);
+	}
+
+	for (int i = 0; i < DIRECTIONS; i++) {
+		movingEnemyBullets[i]->Update(camera.x, camera.y);
 	}
 
 	if (player->getInvincibilityFrames() < counter) {
@@ -165,7 +192,23 @@ void Game::update() {
 			playerRect.w = ENTITY_SIZE * 2;
 			playerRect.h = ENTITY_SIZE * 2;
 
-			if (checkColiision(playerRect, bullets[i]->getRect())) {
+			if (checkColiision(playerRect, basicEnemyBullets[i]->getRect())) {
+				player->setInvincibility(counter + INVINCIBILITY_FRAMES);
+				player->setHp();
+				if (!player->getHp()) {
+					isGameOver = true;
+				}
+				break;
+			}
+		}
+
+		for (int i = 0; i < DIRECTIONS; i++) {
+			// Remove extra player space taken by the thruster
+			SDL_Rect playerRect = player->getRect();
+			playerRect.w = ENTITY_SIZE * 2;
+			playerRect.h = ENTITY_SIZE * 2;
+
+			if (checkColiision(playerRect, movingEnemyBullets[i]->getRect())) {
 				player->setInvincibility(counter + INVINCIBILITY_FRAMES);
 				player->setHp();
 				if (!player->getHp()) {
@@ -186,7 +229,7 @@ void Game::update() {
 // Handle mouse and keyboard input in main menu
 void Game::handleMenuEvents() {
 	SDL_Event event;
-	int mouseX, mouseY;
+	SDL_Point mousePosition;
 
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -201,17 +244,15 @@ void Game::handleMenuEvents() {
 			break;
 
 		case SDL_MOUSEBUTTONDOWN:
-			if (isMenuActive) {
-				mouseX = event.motion.x;
-				mouseY = event.motion.y;
+			mousePosition.x = event.motion.x;
+			mousePosition.y = event.motion.y;
 
-				if (clicked(mouseX, mouseY, startButton->getRect())) {
-					isNewGame = true;
-				}
+			if (SDL_PointInRect(&mousePosition, startButton->getRect())) {
+				isNewGame = true;
+			}
 
-				if (clicked(mouseX, mouseY, exitButton->getRect())) {
-					isRunning = false;
-				}
+			if (SDL_PointInRect(&mousePosition, exitButton->getRect())) {
+				isRunning = false;
 			}
 			break;
 		default:
@@ -223,7 +264,7 @@ void Game::handleMenuEvents() {
 // Handle mouse and keyboard input in game over screen
 void Game::handleGameOverEvents() {
 	SDL_Event event;
-	int mouseX, mouseY;
+	SDL_Point mousePosition;
 
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -238,14 +279,14 @@ void Game::handleGameOverEvents() {
 			break;
 
 		case SDL_MOUSEBUTTONDOWN:
-			mouseX = event.motion.x;
-			mouseY = event.motion.y;
+			mousePosition.x = event.motion.x;
+			mousePosition.y = event.motion.y;
 
-			if (clicked(mouseX, mouseY, gameOverButton->getRect())) {
+			if (SDL_PointInRect(&mousePosition, gameOverButton->getRect())) {
 				isNewGame = true;
 			}
 
-			if (clicked(mouseX, mouseY, menuButton->getRect())) {
+			if (SDL_PointInRect(&mousePosition, menuButton->getRect())) {
 				isGameOver = false;
 				isMenuActive = true;
 			}
@@ -264,13 +305,20 @@ void Game::render() {
 	player->Render();
 	timer->Render();
 
-	for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-		enemies[i]->Render();
+	for (int i = 0; i < NUMBER_OF_BASIC_ENEMIES; i++) {
+		basicEnemies[i]->Render();
 	}
 
+	movingEnemy->Render();
+
 	for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-		bullets[i]->Render();
+		basicEnemyBullets[i]->Render();
 	}
+
+	for (int i = 0; i < DIRECTIONS; i++) {
+		movingEnemyBullets[i]->Render();
+	}
+
 
 	for (int i = 0; i < player->getHp(); i++) {
 		health[i]->Render();

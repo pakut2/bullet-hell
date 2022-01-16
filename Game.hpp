@@ -46,8 +46,12 @@ public:
 		realTime = time;
 	}
 
+	void setDeltaTime(int time) {
+		deltaTime = time;
+	}
+
 private:
-	int counter, realTime;
+	int counter, realTime, deltaTime;
 	bool isRunning, isNewGame, isGameOver, isMenuActive;
 	SDL_Window* window;
 	SDL_Renderer* renderer;

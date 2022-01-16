@@ -5,8 +5,6 @@ public:
 	Player(const char* textureSheet, SDL_Renderer* ren);
 	~Player();
 
-	static const int PLAYER_VEL = 10;
-
 	void Update(int camX, int camY);
 	void HandleEvent(SDL_Event& e);
 	void Move();
@@ -36,7 +34,7 @@ private:
 	// Remaining health of the player
 	int hp;
 
-	// player dimensions
+	// Player dimensions in a single animation state
 	int playerSize;
 
 	SDL_Texture* texture;

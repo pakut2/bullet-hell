@@ -6,8 +6,6 @@ public:
 	Bullet(const char* textureSheet, SDL_Renderer* ren, int x, int y);
 	~Bullet();
 
-	static const int BULLET_VEL = 10;
-
 	void Update(int camX, int camY);
 	void Move(int VelX, int VelY);
 	void Render();
@@ -16,11 +14,8 @@ public:
 		return destRect;
 	}
 
-	// int getPosX();
-	// int getPosY();
-
 private:
-	// The current position of the bullet
+	// The initial position of the bullet
 	int PosX, PosY;
 
 	// The velocity of the bullet

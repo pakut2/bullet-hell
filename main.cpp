@@ -44,6 +44,8 @@ int main(int argc, char* argv[]) {
 
 		frameTime = SDL_GetTicks() - frameStart;
 
+		game->setDeltaTime(frameTime);
+
 		if (frameDelay > frameTime) {
 			SDL_Delay(frameDelay - frameTime);
 			realTime += frameDelay - frameTime;

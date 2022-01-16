@@ -6,6 +6,7 @@ Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	renderer = ren;
 	texture = TextureManager::LoadTexture(textureSheet, ren);
 
+	// Size of player including thruster
 	playerSize = 30;
 
 	// Init position
@@ -22,6 +23,7 @@ Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	// Init player hp
 	hp = PLAYER_HEALTH;
 
+	// Init visible part of player image dimensions
 	srcRect.w = playerSize;
 	srcRect.h = playerSize;
 }
@@ -40,23 +42,23 @@ void Player::Update(int camX, int camY) {
 
 // Handle keyboard input
 void Player::HandleEvent(SDL_Event& e) {
-	// Adjust the player velocity
+	// Adjust the player velocity and change visible part of player image
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP:
-			VelY -= PLAYER_VEL;
+			VelY -= PLAYER_VELOCITY;
 			srcRect.x = playerSize * 2;
 			break;
 		case SDLK_DOWN:
-			VelY += PLAYER_VEL;
+			VelY += PLAYER_VELOCITY;
 			srcRect.x = playerSize;
 			break;
 		case SDLK_LEFT:
-			VelX -= PLAYER_VEL;
+			VelX -= PLAYER_VELOCITY;
 			srcRect.x = playerSize * 3;
 			break;
 		case SDLK_RIGHT:
-			VelX += PLAYER_VEL;
+			VelX += PLAYER_VELOCITY;
 			srcRect.x = 0;
 			break;
 		}
@@ -64,16 +66,16 @@ void Player::HandleEvent(SDL_Event& e) {
 	else if (e.type == SDL_KEYUP && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP:
-			VelY += PLAYER_VEL;
+			VelY += PLAYER_VELOCITY;
 			break;
 		case SDLK_DOWN:
-			VelY -= PLAYER_VEL;
+			VelY -= PLAYER_VELOCITY;
 			break;
 		case SDLK_LEFT:
-			VelX += PLAYER_VEL;
+			VelX += PLAYER_VELOCITY;
 			break;
 		case SDLK_RIGHT:
-			VelX -= PLAYER_VEL;
+			VelX -= PLAYER_VELOCITY;
 			break;
 		}
 	}

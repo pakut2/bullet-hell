@@ -11,16 +11,16 @@ Label::Label(const char* textureSheet, SDL_Renderer* ren, int x, int y, const ch
 	PosY = y;
 
 	if (small) {
-		entityRect.w = ENTITY_SIZE * 6;
-		entityRect.h = ENTITY_SIZE * 2;
+		destRect.w = ENTITY_SIZE * 6;
+		destRect.h = ENTITY_SIZE * 2;
 	}
 	else {
-		entityRect.w = LABEL_WIDTH * 2;
-		entityRect.h = LABEL_HEIGHT * 2;
+		destRect.w = LABEL_WIDTH * 2;
+		destRect.h = LABEL_HEIGHT * 2;
 	}
 
-	entityRect.x = PosX;
-	entityRect.y = PosY;
+	destRect.x = PosX;
+	destRect.y = PosY;
 }
 
 Label::~Label() {
@@ -28,5 +28,5 @@ Label::~Label() {
 }
 
 void Label::Render() {
-	SDL_RenderCopy(renderer, texture, NULL, &entityRect);
+	SDL_RenderCopy(renderer, texture, NULL, &destRect);
 }

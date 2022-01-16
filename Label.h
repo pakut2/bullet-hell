@@ -8,8 +8,8 @@ public:
 
 	void Render();
 
-	SDL_Rect getRect() {
-		return entityRect;
+	SDL_Rect* getRect() {
+		return &destRect;
 	}
 
 private:
@@ -17,6 +17,6 @@ private:
 	int PosY;
 
 	SDL_Texture* texture;
-	SDL_Rect entityRect;
+	SDL_Rect destRect;
 	SDL_Renderer* renderer;
 };
