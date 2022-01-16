@@ -20,7 +20,7 @@ Bullet* movingEnemyBullets[DIRECTIONS];
 GameObject* health[PLAYER_HEALTH];
 SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
-// Backgorunds and menu labels
+// Backgrounds and menu labels
 TextureManager* BGTexture;
 TextureManager* MenuBGTexture;
 Label* startButton;
