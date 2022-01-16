@@ -6,6 +6,8 @@ Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	renderer = ren;
 	texture = TextureManager::LoadTexture(textureSheet, ren);
 
+	playerSize = 30;
+
 	// Init position
 	PosX = 0;
 	PosY = 100;
@@ -19,6 +21,9 @@ Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 
 	// Init player hp
 	hp = PLAYER_HEALTH;
+
+	srcRect.w = playerSize;
+	srcRect.h = playerSize;
 }
 
 Player::~Player() {
@@ -27,10 +32,10 @@ Player::~Player() {
 
 // Update player position
 void Player::Update(int camX, int camY) {
-	entityRect.w = ENTITY_SIZE * 2;
-	entityRect.h = ENTITY_SIZE * 2;
-	entityRect.x = PosX - camX;
-	entityRect.y = PosY - camY;
+	destRect.w = playerSize * 2;
+	destRect.h = playerSize * 2;
+	destRect.x = PosX - camX;
+	destRect.y = PosY - camY;
 }
 
 // Handle keyboard input
@@ -40,15 +45,19 @@ void Player::HandleEvent(SDL_Event& e) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP:
 			VelY -= PLAYER_VEL;
+			srcRect.x = playerSize * 2;
 			break;
 		case SDLK_DOWN:
 			VelY += PLAYER_VEL;
+			srcRect.x = playerSize;
 			break;
 		case SDLK_LEFT:
 			VelX -= PLAYER_VEL;
+			srcRect.x = playerSize * 3;
 			break;
 		case SDLK_RIGHT:
 			VelX += PLAYER_VEL;
+			srcRect.x = 0;
 			break;
 		}
 	}
@@ -114,5 +123,5 @@ void Player::setHp() {
 }
 
 void Player::Render() {
-	SDL_RenderCopy(renderer, texture, NULL, &entityRect);
+	SDL_RenderCopy(renderer, texture, &srcRect, &destRect);
 }

@@ -17,10 +17,10 @@ Bullet::~Bullet() {
 
 // Update Bullet position
 void Bullet::Update(int camX, int camY) {
-	entityRect.w = ENTITY_SIZE * 2;
-	entityRect.h = ENTITY_SIZE * 2;
-	entityRect.x = PosX - camX;
-	entityRect.y = PosY - camY;
+	destRect.w = ENTITY_SIZE * 2;
+	destRect.h = ENTITY_SIZE * 2;
+	destRect.x = PosX - camX;
+	destRect.y = PosY - camY;
 }
 
 void Bullet::Move(int VelX, int VelY) {
@@ -32,5 +32,5 @@ void Bullet::Move(int VelX, int VelY) {
 }
 
 void Bullet::Render() {
-	SDL_RenderCopy(renderer, texture, NULL, &entityRect);
+	SDL_RenderCopy(renderer, texture, NULL, &destRect);
 }

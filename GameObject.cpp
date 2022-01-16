@@ -10,10 +10,10 @@ GameObject::GameObject(const char* textureSheet, SDL_Renderer* ren, int x, int y
 	PosX = x;
 	PosY = y;
 
-	entityRect.w = ENTITY_SIZE * 2;
-	entityRect.h = ENTITY_SIZE * 2;
-	entityRect.x = PosX;
-	entityRect.y = PosY;
+	destRect.w = ENTITY_SIZE * 2;
+	destRect.h = ENTITY_SIZE * 2;
+	destRect.x = PosX;
+	destRect.y = PosY;
 }
 
 GameObject::~GameObject() {
@@ -21,5 +21,5 @@ GameObject::~GameObject() {
 }
 
 void GameObject::Render() {
-	SDL_RenderCopy(renderer, texture, NULL, &entityRect);
+	SDL_RenderCopy(renderer, texture, NULL, &destRect);
 }

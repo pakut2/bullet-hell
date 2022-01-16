@@ -43,7 +43,7 @@ void Game::init(const char* title, int xPos, int yPos, int width, int height, bo
 	if (!SDL_Init(SDL_INIT_EVERYTHING)) {
 		window = SDL_CreateWindow(title, xPos, yPos, width, height, flags);
 
-		renderer = SDL_CreateRenderer(window, -1, 0);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -160,7 +160,12 @@ void Game::update() {
 
 	if (player->getInvincibilityFrames() < counter) {
 		for (int i = 0; i < NUMBER_OF_ALL_BULLETS; i++) {
-			if (checkColiision(player->getRect(), bullets[i]->getRect())) {
+			// Remove extra player space taken by the thruster
+			SDL_Rect playerRect = player->getRect();
+			playerRect.w = ENTITY_SIZE * 2;
+			playerRect.h = ENTITY_SIZE * 2;
+
+			if (checkColiision(playerRect, bullets[i]->getRect())) {
 				player->setInvincibility(counter + INVINCIBILITY_FRAMES);
 				player->setHp();
 				if (!player->getHp()) {

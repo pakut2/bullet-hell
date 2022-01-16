@@ -16,6 +16,6 @@ private:
 	int PosX, PosY;
 
 	SDL_Texture* texture;
-	SDL_Rect srcRect, entityRect;
+	SDL_Rect destRect;
 	SDL_Renderer* renderer;
 };

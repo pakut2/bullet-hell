@@ -20,7 +20,7 @@ public:
 	void setHp();
 
 	SDL_Rect getRect() {
-		return entityRect;
+		return destRect;
 	}
 
 private:
@@ -36,7 +36,10 @@ private:
 	// Remaining health of the player
 	int hp;
 
+	// player dimensions
+	int playerSize;
+
 	SDL_Texture* texture;
-	SDL_Rect entityRect;
+	SDL_Rect srcRect, destRect;
 	SDL_Renderer* renderer;
 };
