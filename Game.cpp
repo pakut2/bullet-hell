@@ -3,7 +3,6 @@
 #include "TextureManager.h"
 #include "GameObject.h"
 #include "Player.h"
-#include "Texture.h"
 #include "Constants.h"
 #include "utils.h"
 #include "Enemy.h"
@@ -22,8 +21,8 @@ GameObject* health[PLAYER_HEALTH];
 SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
 // Backgorunds and menu labels
-Texture* BGTexture;
-Texture* MenuBGTexture;
+TextureManager* BGTexture;
+TextureManager* MenuBGTexture;
 Label* startButton;
 Label* exitButton;
 Label* gameOverButton;
@@ -111,10 +110,10 @@ void Game::init(const char* title, int xPos, int yPos, int width, int height, bo
 		isRunning = false;
 	}
 
-	BGTexture = new Texture(renderer);
+	BGTexture = new TextureManager(renderer);
 	BGTexture->LoadFromFile("assets/bg.bmp");
 
-	MenuBGTexture = new Texture(renderer);
+	MenuBGTexture = new TextureManager(renderer);
 	MenuBGTexture->LoadFromFile("assets/menubg.bmp");
 
 	startButton = new Label("assets/start.bmp", renderer, SCREEN_WIDTH / 10, SCREEN_HEIGHT / 2 - 120, "", false);

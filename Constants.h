@@ -9,10 +9,10 @@ const int SCREEN_HEIGHT = 480;
 // Define number of enemy types present in game
 const int NUMBER_OF_ENEMY_TYPES = 3;
 
-// Define number of basic enemies present in game
+// Define number of basic enemies present in game (min 1)
 const int NUMBER_OF_BASIC_ENEMIES = 3;
 
-// Define number of curve enemies present in game
+// Define number of curve enemies present in game (min 1)
 const int NUMBER_OF_CURVE_ENEMIES = 3;
 
 // Define entity size in px

@@ -46,12 +46,8 @@ public:
 		realTime = time;
 	}
 
-	void setDeltaTime(int time) {
-		deltaTime = time;
-	}
-
 private:
-	int counter, realTime, deltaTime;
+	int counter, realTime;
 	bool isRunning, isNewGame, isGameOver, isMenuActive;
 	double bulletAngle;
 

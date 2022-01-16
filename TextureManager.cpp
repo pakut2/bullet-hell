@@ -26,6 +26,57 @@ void DrawString(SDL_Surface* surface, int x, int y, const char* text) {
 	SDL_FreeSurface(charset);
 };
 
+TextureManager::TextureManager(SDL_Renderer* ren) {
+	texture = NULL;
+	imageWidth = 0;
+	imageHeight = 0;
+	renderer = ren;
+}
+
+TextureManager::~TextureManager() {
+	Clean();
+}
+
+bool TextureManager::LoadFromFile(const char* path) {
+	Clean();
+
+	SDL_Texture* newTexture = NULL;
+	SDL_Surface* loadedSurface = IMG_Load(path);
+
+	if (loadedSurface) {
+		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+
+		newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
+
+		if (newTexture) {
+			imageWidth = loadedSurface->w;
+			imageHeight = loadedSurface->h;
+		}
+
+		SDL_FreeSurface(loadedSurface);
+	}
+
+	texture = newTexture;
+	return texture != NULL;
+}
+
+void TextureManager::Clean() {
+	SDL_DestroyTexture(texture);
+}
+
+void TextureManager::Render(int x, int y, SDL_Rect* clip) {
+	SDL_Rect renderQuad = { x, y, imageWidth, imageHeight };
+	SDL_RenderCopyEx(renderer, texture, clip, &renderQuad, 0.0, NULL, SDL_FLIP_NONE);
+}
+
+int TextureManager::GetWidth() {
+	return imageWidth;
+}
+
+int TextureManager::GetHeight() {
+	return imageHeight;
+}
+
 SDL_Texture* TextureManager::LoadTexture(const char* filename, SDL_Renderer* renderer) {
 	SDL_Surface* surface = SDL_LoadBMP(filename);
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
