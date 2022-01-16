@@ -165,7 +165,7 @@ void Game::handleEvents() {
 	player->Move();
 
 	// Shoot bullets in interval
-	if (counter % 70 == 0) {
+	if (counter % 50 == 0 && counter % 100 != 0) {
 		shoot(renderer, basicEnemies, basicEnemyBullets, NUMBER_OF_BASIC_ENEMIES);
 	}
 
