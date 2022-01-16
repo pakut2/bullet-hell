@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "TextureManager.h"
 #include "Constants.h"
+#include <iostream>
 
 Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	renderer = ren;
@@ -26,6 +27,9 @@ Player::Player(const char* textureSheet, SDL_Renderer* ren) {
 	// Init visible part of player image dimensions
 	srcRect.w = playerSize;
 	srcRect.h = playerSize;
+
+	// Animation frame
+	animationFrame = 0;
 }
 
 Player::~Player() {
@@ -38,28 +42,39 @@ void Player::Update(int camX, int camY) {
 	destRect.h = playerSize * 2;
 	destRect.x = PosX - camX;
 	destRect.y = PosY - camY;
+
+	// Every 1/3 of a frame, change displayed thruster
+	animationFrame++;
+	if (FPS / animationFrame == 3) {
+		animationFrame = 0;
+		srcRect.x += playerSize;
+		if (srcRect.x >= playerSize * 2) {
+			srcRect.x = 0;
+		}
+	}
 }
 
 // Handle keyboard input
 void Player::HandleEvent(SDL_Event& e) {
+	std::cout << animationFrame << "\n";
 	// Adjust the player velocity and change visible part of player image
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 		switch (e.key.keysym.sym) {
 		case SDLK_UP:
 			VelY -= PLAYER_VELOCITY;
-			srcRect.x = playerSize * 2;
+			srcRect.y = playerSize * 2;
 			break;
 		case SDLK_DOWN:
 			VelY += PLAYER_VELOCITY;
-			srcRect.x = playerSize;
+			srcRect.y = playerSize;
 			break;
 		case SDLK_LEFT:
 			VelX -= PLAYER_VELOCITY;
-			srcRect.x = playerSize * 3;
+			srcRect.y = playerSize * 3;
 			break;
 		case SDLK_RIGHT:
 			VelX += PLAYER_VELOCITY;
-			srcRect.x = 0;
+			srcRect.y = 0;
 			break;
 		}
 	}

@@ -6,6 +6,9 @@ const int LEVEL_HEIGHT = 960;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+// Define capped fps
+const int FPS = 60;
+
 // Define number of enemy types present in game
 const int NUMBER_OF_ENEMY_TYPES = 3;
 

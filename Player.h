@@ -37,6 +37,9 @@ private:
 	// Player dimensions in a single animation state
 	int playerSize;
 
+	// Animation frame
+	int animationFrame;
+
 	SDL_Texture* texture;
 	SDL_Rect srcRect, destRect;
 	SDL_Renderer* renderer;
